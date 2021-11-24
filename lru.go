@@ -9,6 +9,7 @@ import (
 // Cache is a thread-safe fixed size LRU cache.
 type Cache struct {
 	lru  simplelru.LRUCache
+	// 读写锁： 保证线程读写安全
 	lock sync.RWMutex
 }
 
@@ -74,6 +75,8 @@ func (c *Cache) Peek(key interface{}) (value interface{}, ok bool) {
 // ContainsOrAdd checks if a key is in the cache without updating the
 // recent-ness or deleting it for being stale, and if not, adds the value.
 // Returns whether found and whether an eviction occurred.
+// ok: 返回是否存在key
+// evicted： 返回是否触发了淘汰key
 func (c *Cache) ContainsOrAdd(key, value interface{}) (ok, evicted bool) {
 	c.lock.Lock()
 	defer c.lock.Unlock()

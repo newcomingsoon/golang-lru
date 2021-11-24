@@ -26,13 +26,19 @@ const (
 // computationally about 2x the cost, and adds some metadata over
 // head. The ARCCache is similar, but does not require setting any
 // parameters.
+//  该实现： 区分：最近访问 和 访问频率 两种方式
 type TwoQueueCache struct {
 	size       int
+	//
 	recentSize int
-
+	// 最近被访问的LRU
 	recent      simplelru.LRUCache
+	// 按照频率统计的LRU， 优先判断是否存在该LRU中，在判断recent
+	// 如果在recent中，同时将元素加入frequent中，然后在recent中将其删除
 	frequent    simplelru.LRUCache
+	// 记入最近淘汰的key的LRU
 	recentEvict simplelru.LRUCache
+	// 读写锁：保证线程安全
 	lock        sync.RWMutex
 }
 
